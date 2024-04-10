@@ -25,17 +25,18 @@ JUMP_HEIGHT = 30
 
 # =================================   STORED DATA  =================================
 # insert the location of the meshes in the dictionary. Actual example: '.\\models_compressed\\Idle_Michelle' rather than 'cube' THIS IS CASE SENSITIVE.
-# anim_location = {
-#     "idle": 'insert file location here',
-#     "walk": '.\\a different location\\but this is the format',  # Notice how you do not need to put the ".obj" nor the numbering, #s and order pulled automatically
-#     }
+
+anim_location = {
+     "idle": 'insert file location here',
+     "walk": '.\\a different location\\but this is the format',  # Notice how you do not need to put the ".obj" nor the numbering, #s and order pulled automatically
+     }
 
 # (loco aka "Locomotion") The second half of the dict includes details of the animation. Actual example: 'FrameAnimation3d(name=anim_location["walk"], fps=30)'
-# loco = {
-#     "idle": "cube",
-#     "walk": "sphere",
-#     "name of animation": "animation details"
-# }
+ loco = {
+     "idle": "cube",
+     "walk": "sphere",
+     "name of animation": "animation details"
+ }
 
 # =================================   WINDOW FUNCTIONS  =================================
 
