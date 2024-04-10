@@ -1,0 +1,139 @@
+from ursina.prefabs.first_person_controller import FirstPersonController
+from ursina import Ursina, Sky, FrameAnimation3d, Entity, Vec2, camera, color
+from ursina.input_handler import held_keys
+
+# =================================   NOTES  =================================
+# Was working in PyCharm 2024.1 as of April 2024
+# This script used an imported model (.obj format) using this script. The memory usage on my device exceeded 2k MB, which was
+# causing problems. That's why I terminated the project. This never progressed beyond the testing phase for animation due to
+# the afformentioned memory limitations. 
+# Please note that 3D animations render "frame by frame" meaning each 3d model's animation frame has to be imported individually.
+# (For me this was 250 files per animation! It was brutal for my poor laptop.) If anyone would like to use this for their project's 
+# starting point, you're more than welcome.
+# There is no ThirdPersonController, so all controlls for this third person game are done through the FirstPersonController.
+# Toggling between animations utilized dictionaries. Since I am not including the animations, I will notate the naming conventions.
+# =================================================================
+
+app = Ursina()
+
+# =================================   Constants  =================================
+CAMERA_POSITION = (0, 0, -25)
+HOTBAR_COLOR = color.dark_gray
+MOVEMENT_SPEED = 30
+CAMERA_FOV = 40
+JUMP_HEIGHT = 30
+
+# =================================   STORED DATA  =================================
+# insert the location of the meshes in the dictionary. Actual example: '.\\models_compressed\\Idle_Michelle' rather than 'cube' THIS IS CASE SENSITIVE.
+# anim_location = {
+#     "idle": 'insert file location here',
+#     "walk": '.\\a different location\\but this is the format',  # Notice how you do not need to put the ".obj" nor the numbering, #s and order pulled automatically
+#     }
+
+# (loco aka "Locomotion") The second half of the dict includes details of the animation. Actual example: 'FrameAnimation3d(name=anim_location["walk"], fps=30)'
+# loco = {
+#     "idle": "cube",
+#     "walk": "sphere",
+#     "name of animation": "animation details"
+# }
+
+# =================================   WINDOW FUNCTIONS  =================================
+
+
+def input(key):
+    if key == 'escape':
+        quit()
+    if key == 'e':  # This doesn't work inside "update" method but WHY??? (Misc research for later)
+        ui.toggle()
+
+# =================================   GROUND  =================================
+
+
+class Ground(Entity):
+    def __init__(self):
+        super().__init__()
+        self.model = "plane"
+        self.position = (0, 0, 0)
+        self.scale = (500, 0, 500)
+        self.texture = "grass"
+        self.texture_scale = (10, 10)
+        self.collider = "box"
+        self.double_sided = True
+
+
+ground = Ground()  # Creates the ground after being created above
+
+# =================================   PLAYER/USER  =================================
+
+
+class PlayerCam(FirstPersonController):
+    def __init__(self):
+        super().__init__()
+        # new_height = (int(self.height) * -.25)  # Only used when using default models, otherwise never change origin
+        self.model = loco["idle"]
+        self.collision = "box"
+        self.mouse_sensitivity = Vec2(90, 90)
+        self.speed = MOVEMENT_SPEED
+        self.position = (0, 20, 0)
+        self.jump_height = JUMP_HEIGHT
+        camera.position = CAMERA_POSITION
+        camera.fov = CAMERA_FOV
+        self.gravity = 3
+        self.jump_up_duration = .5
+        self.fall_after = .8
+
+    def walk(self):
+        self.model = loco["walk"]
+
+    def run(self):
+        self.model = loco["run"]
+        self.speed = MOVEMENT_SPEED * 2
+
+    def idle(self):
+        self.model = loco["idle"]
+        self.speed = MOVEMENT_SPEED
+
+
+cam = PlayerCam()  # Creates an instance of the camera above
+
+# =================================   UI (USER INTERFACE)  =================================
+
+
+class Hotbar(Entity):
+    def __init__(self):
+        super().__init__()
+        self.model = "quad"
+        self.parent = camera.ui
+        self.scale_y = .1
+        self.position = (0, .4)
+        self.color = HOTBAR_COLOR
+        self.enable = True
+
+    def toggle(self):
+        if not self.color == HOTBAR_COLOR:
+            self.color = HOTBAR_COLOR
+        else:
+            self.color = color.clear
+
+
+ui = Hotbar()
+
+# =================================   REFRESH AND DEBUG  =================================
+
+
+def update():
+    if held_keys['w'] == 1:
+        cam.walk()
+        if held_keys['left shift'] == 1:  # This detects if you're holding the assigned key. 1 is true // 0 is false
+            cam.run()
+        elif held_keys['left shift'] == 0:
+            cam.walk()
+    elif held_keys['w'] == 0:
+        cam.idle()
+
+    for key, value in held_keys.items():
+        if value != 0:
+            print(key, value)
+
+Sky()
+app.run()
